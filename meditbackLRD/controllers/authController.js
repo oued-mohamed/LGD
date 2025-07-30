@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
+const { MESSAGES, STATUS_CODES } = require('../utils/constants'); // ✅ ADDED IMPORT
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -12,9 +13,9 @@ const register = async (req, res) => {
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: 'User already exists with this email'
+        message: MESSAGES.EMAIL_ALREADY_EXISTS // ✅ UPDATED
       });
     }
 
@@ -51,9 +52,9 @@ const register = async (req, res) => {
     const token = user.getSignedJwtToken();
 
     // ✅ Send response compatible with frontend expectations
-    res.status(201).json({
+    res.status(STATUS_CODES.CREATED).json({
       success: true,
-      message: 'User registered successfully',
+      message: MESSAGES.USER_CREATED, // ✅ UPDATED
       token,
       user: {
         id: user._id,
@@ -67,13 +68,12 @@ const register = async (req, res) => {
 
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Server error during registration'
+      message: MESSAGES.SERVER_ERROR // ✅ UPDATED
     });
   }
 };
-
 
 // @desc    Login user
 // @route   POST /api/auth/login
@@ -84,9 +84,9 @@ const login = async (req, res) => {
 
     // Validate email & password
     if (!email || !password) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: 'Please provide an email and password'
+        message: 'Please provide an email and password' // ✅ KEPT: Not in constants yet
       });
     }
 
@@ -94,9 +94,9 @@ const login = async (req, res) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(STATUS_CODES.UNAUTHORIZED).json({
         success: false,
-        message: 'Invalid credentials'
+        message: MESSAGES.INVALID_CREDENTIALS // ✅ UPDATED
       });
     }
 
@@ -104,9 +104,9 @@ const login = async (req, res) => {
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      return res.status(401).json({
+      return res.status(STATUS_CODES.UNAUTHORIZED).json({
         success: false,
-        message: 'Invalid credentials'
+        message: MESSAGES.INVALID_CREDENTIALS // ✅ UPDATED
       });
     }
 
@@ -115,13 +115,13 @@ const login = async (req, res) => {
     await user.save();
 
     // Send token response
-    sendTokenResponse(user, 200, res);
+    sendTokenResponse(user, STATUS_CODES.OK, res); // ✅ UPDATED
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Server error during login'
+      message: MESSAGES.SERVER_ERROR // ✅ UPDATED
     });
   }
 };
@@ -133,15 +133,15 @@ const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       success: true,
       data: user
     });
   } catch (error) {
     console.error('Get user error:', error);
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Server error'
+      message: MESSAGES.SERVER_ERROR // ✅ UPDATED
     });
   }
 };
@@ -155,9 +155,9 @@ const logout = async (req, res) => {
     httpOnly: true,
   });
 
-  res.status(200).json({
+  res.status(STATUS_CODES.OK).json({
     success: true,
-    message: 'User logged out successfully'
+    message: MESSAGES.LOGOUT_SUCCESS // ✅ UPDATED
   });
 };
 
