@@ -1,4 +1,3 @@
-// utils/constants.js - COMPLETE VERSION
 
 // User roles
 const USER_ROLES = {

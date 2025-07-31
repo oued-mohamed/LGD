@@ -39,7 +39,6 @@ const register = async (req, res) => {
 
     // OPTIONAL: send verification email
     const verificationUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-    // You can uncomment this later
     /*
     await sendEmail({
       email: user.email,
